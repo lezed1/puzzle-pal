@@ -22,7 +22,7 @@ const config = defineConfig({
         theme_color: "#ffffff",
       },
       pwaAssets: {
-        image: "src/Semaphore_Papa.svg",
+        image: "public/Semaphore_Papa.svg",
       },
       devOptions: {
         enabled: true,

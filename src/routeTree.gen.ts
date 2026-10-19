@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BrailleRouteImport } from './routes/braille'
+import { Route as MorseRouteImport } from './routes/morse'
+import { Route as SemaphoreRouteImport } from './routes/semaphore'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrailleRoute = BrailleRouteImport.update({
+  id: '/braille',
+  path: '/braille',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MorseRoute = MorseRouteImport.update({
+  id: '/morse',
+  path: '/morse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SemaphoreRoute = SemaphoreRouteImport.update({
+  id: '/semaphore',
+  path: '/semaphore',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/braille': typeof BrailleRoute
+  '/morse': typeof MorseRoute
+  '/semaphore': typeof SemaphoreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/braille': typeof BrailleRoute
+  '/morse': typeof MorseRoute
+  '/semaphore': typeof SemaphoreRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/braille': typeof BrailleRoute
+  '/morse': typeof MorseRoute
+  '/semaphore': typeof SemaphoreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/braille' | '/morse' | '/semaphore'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/braille' | '/morse' | '/semaphore'
+  id: '__root__' | '/' | '/braille' | '/morse' | '/semaphore'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BrailleRoute: typeof BrailleRoute
+  MorseRoute: typeof MorseRoute
+  SemaphoreRoute: typeof SemaphoreRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/braille': {
+      id: '/braille'
+      path: '/braille'
+      fullPath: '/braille'
+      preLoaderRoute: typeof BrailleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/morse': {
+      id: '/morse'
+      path: '/morse'
+      fullPath: '/morse'
+      preLoaderRoute: typeof MorseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/semaphore': {
+      id: '/semaphore'
+      path: '/semaphore'
+      fullPath: '/semaphore'
+      preLoaderRoute: typeof SemaphoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BrailleRoute: BrailleRoute,
+  MorseRoute: MorseRoute,
+  SemaphoreRoute: SemaphoreRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
