@@ -9,6 +9,8 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  // .devenv symlinks into /nix/store; watching it pegs the CPU
+  server: { watch: { ignored: ["**/.devenv/**"] } },
   plugins: [
     devtools(),
     tailwindcss(),
