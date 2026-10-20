@@ -17,26 +17,20 @@ body {
   margin: 0;
 }
 
-/* Mantine sets color-scheme on :root, so light-dark() tracks the app theme. */
-:root {
-  --pp-surface: light-dark(
-    var(--mantine-color-gray-0),
-    var(--mantine-color-dark-8)
-  );
-  --pp-dot-off: light-dark(
-    var(--mantine-color-gray-2),
-    var(--mantine-color-dark-5)
-  );
-  --pp-dot-off-border: light-dark(
-    var(--mantine-color-gray-4),
-    var(--mantine-color-dark-3)
-  );
-  --pp-guide: light-dark(
-    var(--mantine-color-gray-3),
-    var(--mantine-color-dark-4)
-  );
-  --pp-figure: light-dark(
-    var(--mantine-color-dark-6),
-    var(--mantine-color-gray-3)
-  );
+/* Not light-dark(): Lightning CSS compiles it against static color-scheme
+   declarations, and Mantine only sets color-scheme through a var(). */
+:root[data-mantine-color-scheme="light"] {
+  --pp-surface: var(--mantine-color-gray-0);
+  --pp-dot-off: var(--mantine-color-gray-2);
+  --pp-dot-off-border: var(--mantine-color-gray-4);
+  --pp-guide: var(--mantine-color-gray-3);
+  --pp-figure: var(--mantine-color-dark-6);
+}
+
+:root[data-mantine-color-scheme="dark"] {
+  --pp-surface: var(--mantine-color-dark-8);
+  --pp-dot-off: var(--mantine-color-dark-5);
+  --pp-dot-off-border: var(--mantine-color-dark-3);
+  --pp-guide: var(--mantine-color-dark-4);
+  --pp-figure: var(--mantine-color-gray-3);
 }

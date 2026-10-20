@@ -1,4 +1,4 @@
-import { Badge, Button, Checkbox, Group, Stack, Text } from "@mantine/core";
+import { Button, Checkbox, Flex, SimpleGrid, Text } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { SemaphorePerson } from "../components/semaphore/SemaphorePerson";
@@ -67,60 +67,58 @@ function SemaphorePage() {
         output: decodeFromSemaphorePositions(parseSemaphorePairs(decodeInput)),
         sampleText: "0,6 1,5 0,1 0,7 / 2,4 0,1 1,5",
         interactiveWidget: (
-          <Group justify="space-between" wrap="wrap" gap="md">
-            <Group gap="lg">
-              <SemaphorePerson
-                positions={arms}
-                interactive
-                onSelectPosition={selectDirection}
-                size={140}
-              />
-              <Stack gap={2}>
-                <Text size="xs" fw={600}>
-                  Positions: {arms[0]} & {arms[1]}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {DIRECTION_NAMES[arms[0]]} / {DIRECTION_NAMES[arms[1]]}
-                </Text>
-                <Group gap="xs" mt={2}>
-                  <Text size="xs">Decodes to:</Text>
-                  <Badge size="md">
-                    {decodeFromSemaphorePositions([arms]) || "?"}
-                  </Badge>
-                </Group>
-              </Stack>
-            </Group>
-            <Group gap="xs">
+          <Flex
+            gap="md"
+            direction={{ base: "column", sm: "row" }}
+            align={{ base: "center", sm: "stretch" }}
+          >
+            <SemaphorePerson
+              positions={arms}
+              interactive
+              onSelectPosition={selectDirection}
+              size={240}
+            />
+            <SimpleGrid
+              cols={{ base: 2, sm: 1 }}
+              spacing="xs"
+              w="100%"
+              maw={{ sm: 240 }}
+              className="content-center"
+            >
               <Button
-                size="xs"
+                size="md"
+                px="xs"
+                className="col-span-full"
                 onClick={() =>
                   setDecodeInput((prev) =>
                     prev ? `${prev} ${pairLabel(arms)}` : pairLabel(arms),
                   )
                 }
               >
-                + Append ({pairLabel(arms)})
+                Add “{decodeFromSemaphorePositions([arms]) || pairLabel(arms)}”
               </Button>
               <Button
                 variant="light"
                 color="gray"
-                size="xs"
+                size="md"
+                px="xs"
                 onClick={() =>
                   setDecodeInput((prev) => (prev ? `${prev} /` : "/"))
                 }
               >
-                + Space
+                Space
               </Button>
               <Button
                 variant="subtle"
                 color="red"
-                size="xs"
+                size="md"
+                px="xs"
                 onClick={() => setArms([0, 0])}
               >
-                Reset (0,0)
+                Reset
               </Button>
-            </Group>
-          </Group>
+            </SimpleGrid>
+          </Flex>
         ),
       }}
       reference={

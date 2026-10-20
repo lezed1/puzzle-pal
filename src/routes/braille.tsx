@@ -1,4 +1,4 @@
-import { Badge, Button, Checkbox, Group, Stack, Text } from "@mantine/core";
+import { Button, Checkbox, Group, Stack, Text } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { BrailleCell } from "../components/braille/BrailleCell";
@@ -83,57 +83,49 @@ function BraillePage() {
         output: decodeFromBraille(decodeInput),
         sampleText: "125 15 123 123 135 / 1234 1 123",
         interactiveWidget: (
-          <Group justify="space-between" wrap="wrap" gap="md">
-            <Group gap="lg">
-              <BrailleCell
-                dots={pinpadDots}
-                interactive
-                onToggleDot={toggleDot}
-                size="lg"
-              />
-              <Stack gap={2}>
-                <Text size="xs" fw={600}>
-                  Dots: {pinpadDots.join("-") || "None"}
-                </Text>
-                <Text size="xs">
-                  Char:{" "}
-                  <Text span size="xl">
-                    {pinpadUnicode}
-                  </Text>
-                </Text>
-                <Group gap="xs" mt={2}>
-                  <Text size="xs">Decodes to:</Text>
-                  <Badge size="md">
-                    {decodeFromBraille(pinpadUnicode) || "?"}
-                  </Badge>
-                </Group>
-              </Stack>
-            </Group>
-            <Group gap="xs">
+          <Group gap="md" wrap="nowrap" align="stretch">
+            <BrailleCell
+              dots={pinpadDots}
+              interactive
+              onToggleDot={toggleDot}
+              size="xl"
+            />
+            <Stack
+              gap="xs"
+              justify="center"
+              className="flex-1"
+              miw={0}
+              maw={240}
+            >
               <Button
-                size="xs"
+                size="md"
+                px="xs"
                 onClick={() => setDecodeInput((prev) => prev + pinpadUnicode)}
                 disabled={pinpadDots.length === 0}
               >
-                + Append
+                {pinpadDots.length
+                  ? `Add “${decodeFromBraille(pinpadUnicode)}”`
+                  : "Add"}
               </Button>
               <Button
                 variant="light"
                 color="gray"
-                size="xs"
+                size="md"
+                px="xs"
                 onClick={() => setDecodeInput((prev) => `${prev} `)}
               >
-                + Space
+                Space
               </Button>
               <Button
                 variant="subtle"
                 color="red"
-                size="xs"
+                size="md"
+                px="xs"
                 onClick={() => setPinpadDots([])}
               >
-                Clear Pinpad
+                Clear
               </Button>
-            </Group>
+            </Stack>
           </Group>
         ),
       }}
