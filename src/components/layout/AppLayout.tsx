@@ -71,6 +71,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               />
               <Link
                 to="/"
+                onClick={close}
                 className="flex items-center gap-2 text-inherit no-underline"
               >
                 <span className="text-[22px] leading-none">🧩</span>
