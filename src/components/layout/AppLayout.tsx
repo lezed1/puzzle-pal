@@ -14,7 +14,6 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   IconDots,
   IconFlag,
-  IconHome,
   IconMoon,
   IconRadio,
   IconSun,
@@ -45,9 +44,6 @@ export const TOOLS = [
     summary: "Dots, Dashes & Tap Input",
   },
 ] as const;
-
-const NAV_ITEMS = [{ label: "Home", to: "/", icon: IconHome }, ...TOOLS];
-
 export function AppLayout({ children }: { children: ReactNode }) {
   const [opened, { toggle, close }] = useDisclosure(false);
   const currentPath = useLocation({ select: (l) => l.pathname });
@@ -86,7 +82,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </Group>
 
             <Group gap="xs" visibleFrom="sm">
-              {NAV_ITEMS.map((item) => {
+              {TOOLS.map((item) => {
                 const Icon = item.icon;
                 const active = currentPath === item.to;
                 return (
@@ -124,7 +120,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       <AppShell.Navbar p="sm">
         <Stack gap="xs">
-          {NAV_ITEMS.map((item) => {
+          {TOOLS.map((item) => {
             const Icon = item.icon;
             const active = currentPath === item.to;
             return (
