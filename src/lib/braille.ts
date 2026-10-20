@@ -121,32 +121,48 @@ export interface BrailleEncodeOptions {
   includeCapitalSign?: boolean;
 }
 
-export function encodeToBraille(
+export interface BrailleCellOutput {
+  /** Source text this cell represents, e.g. "A", "1", or "#" for the number sign. */
+  label: string;
+  cell: string;
+}
+
+export function encodeToBrailleCells(
   text: string,
   {
     includeNumberSign = true,
     includeCapitalSign = false,
   }: BrailleEncodeOptions = {},
-): string {
-  let out = "";
+): BrailleCellOutput[] {
+  const out: BrailleCellOutput[] = [];
   let inNumberMode = false;
 
   for (const ch of text) {
     if (/[0-9]/.test(ch)) {
-      if (includeNumberSign && !inNumberMode) out += NUMBER_SIGN_UNICODE;
+      if (includeNumberSign && !inNumberMode)
+        out.push({ label: "#", cell: NUMBER_SIGN_UNICODE });
       inNumberMode = true;
-      out += dotsToUnicode(BRAILLE_DIGITS[ch]);
+      out.push({ label: ch, cell: dotsToUnicode(BRAILLE_DIGITS[ch]) });
       continue;
     }
     inNumberMode = false;
 
-    if (includeCapitalSign && /[A-Z]/.test(ch)) out += CAPITAL_SIGN_UNICODE;
+    if (includeCapitalSign && /[A-Z]/.test(ch))
+      out.push({ label: "CAP", cell: CAPITAL_SIGN_UNICODE });
     const dots = BRAILLE_LETTERS[ch.toLowerCase()] ?? BRAILLE_PUNCTUATION[ch];
-    out += dots ? dotsToUnicode(dots) : ch;
+    out.push({
+      label: ch.toUpperCase(),
+      cell: dots ? dotsToUnicode(dots) : ch,
+    });
   }
 
   return out;
 }
+
+export const encodeToBraille = (text: string, options?: BrailleEncodeOptions) =>
+  encodeToBrailleCells(text, options)
+    .map((c) => c.cell)
+    .join("");
 
 /** Decodes Unicode braille, or dot-number tokens like "125 15" / "1-2-5 1-5" ("/" = space). */
 export function decodeFromBraille(input: string): string {

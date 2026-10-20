@@ -8,7 +8,7 @@ import {
   BRAILLE_REFERENCE_LIST,
   decodeFromBraille,
   dotsToUnicode,
-  encodeToBraille,
+  encodeToBrailleCells,
   unicodeToDots,
 } from "../lib/braille";
 
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/braille")({
 
 function BraillePage() {
   const [encodeInput, setEncodeInput] = useState("PUZZLE PAL");
-  const [includeNumberSign, setIncludeNumberSign] = useState(true);
+  const [includeNumberSign, setIncludeNumberSign] = useState(false);
   const [includeCapitalSign, setIncludeCapitalSign] = useState(false);
   const [decodeInput, setDecodeInput] = useState("⠏⠥⠵⠵⠇⠑ ⠏⠁⠇");
   const [pinpadDots, setPinpadDots] = useState<number[]>([1]);
@@ -31,7 +31,7 @@ function BraillePage() {
     );
 
   const pinpadUnicode = dotsToUnicode(pinpadDots);
-  const encoded = encodeToBraille(encodeInput, {
+  const cells = encodeToBrailleCells(encodeInput, {
     includeNumberSign,
     includeCapitalSign,
   });
@@ -42,7 +42,7 @@ function BraillePage() {
       encode={{
         input: encodeInput,
         onInputChange: setEncodeInput,
-        output: encoded,
+        output: cells.map((c) => c.cell).join(""),
         sampleText: "ESCAPE ROOM 2026",
         controls: (
           <Group gap="lg">
@@ -58,8 +58,8 @@ function BraillePage() {
             />
           </Group>
         ),
-        visualOutput: Array.from(encoded, (ch, i) => {
-          const dots = unicodeToDots(ch);
+        visualOutput: cells.map(({ label, cell }, i) => {
+          const dots = unicodeToDots(cell);
           return (
             // biome-ignore lint/suspicious/noArrayIndexKey: output is derived and never reordered
             <SymbolTile key={i} minWidth={44}>
@@ -67,11 +67,11 @@ function BraillePage() {
                 <BrailleCell dots={dots} size="sm" />
               ) : (
                 <Text size="xs" c="dimmed" h={52} className="flex items-center">
-                  {ch === "\n" ? "ENTER" : ch === " " ? "SPACE" : ch}
+                  {cell === "\n" ? "ENTER" : cell === " " ? "SPACE" : cell}
                 </Text>
               )}
-              <Text size="lg" lh={1}>
-                {ch}
+              <Text size="xs" fw={700}>
+                {label}
               </Text>
             </SymbolTile>
           );

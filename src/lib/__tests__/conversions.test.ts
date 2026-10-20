@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { decodeFromBraille, encodeToBraille } from "../braille";
+import {
+  decodeFromBraille,
+  encodeToBraille,
+  encodeToBrailleCells,
+} from "../braille";
 import { decodeFromMorse, encodeToMorse } from "../morse";
 import {
   decodeFromSemaphorePositions,
@@ -27,6 +31,11 @@ describe("braille", () => {
     const encoded = encodeToBraille("Hi", { includeCapitalSign: true });
     expect(encoded).toBe("⠠⠓⠊");
     expect(decodeFromBraille(encoded)).toBe("Hi");
+  });
+
+  it("labels each cell with its source text, including prefix signs", () => {
+    const cells = encodeToBrailleCells("Hi 2", { includeCapitalSign: true });
+    expect(cells.map((c) => c.label)).toEqual(["CAP", "H", "I", " ", "#", "2"]);
   });
 
   it("decodes dot-number notation in any order or separator style", () => {

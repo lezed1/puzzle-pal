@@ -1,4 +1,6 @@
-@import "@mantine/core/styles.css";
+/* Mantine must sit between Tailwind's preflight and utilities so utility classes override component defaults. */
+@layer theme, base, mantine, components, utilities;
+@import "@mantine/core/styles.layer.css";
 @import "tailwindcss";
 
 * {
