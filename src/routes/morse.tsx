@@ -24,8 +24,7 @@ function MorsePage() {
 
   return (
     <ToolView
-      title="Morse Code"
-      icon="📻"
+      tool="/morse"
       encode={{
         input: encodeInput,
         onInputChange: setEncodeInput,

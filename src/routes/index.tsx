@@ -20,17 +20,19 @@ function HomePage() {
     <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
       {TOOLS.map(({ label, to, icon: Icon, color, summary }) => (
         <Card key={to} withBorder radius="md" p="md">
-          <Group justify="space-between">
+          <Group gap="sm" wrap="nowrap">
             <ThemeIcon size={40} radius="md" color={color} variant="light">
               <Icon size={24} />
             </ThemeIcon>
-            <Text size="xs" fw={600} c="dimmed">
-              {summary}
-            </Text>
+            <div>
+              <Title order={3} size="h4">
+                {label}
+              </Title>
+              <Text size="sm" c="dimmed">
+                {summary}
+              </Text>
+            </div>
           </Group>
-          <Title order={3} size="h4" mt="sm">
-            {label}
-          </Title>
           <Button
             component={Link}
             to={to}

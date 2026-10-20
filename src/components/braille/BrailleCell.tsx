@@ -33,7 +33,7 @@ export function BrailleCell({
       radius="md"
       w={width}
       h={height}
-      bg={interactive ? "var(--mantine-color-gray-0)" : "transparent"}
+      bg={interactive ? "var(--pp-surface)" : "transparent"}
       shadow={interactive ? "xs" : undefined}
       className="flex flex-col justify-between"
     >
@@ -57,10 +57,10 @@ export function BrailleCell({
                   height: dotSize,
                   border: active
                     ? "none"
-                    : "1.5px solid var(--mantine-color-gray-4)",
+                    : "1.5px solid var(--pp-dot-off-border)",
                   backgroundColor: active
                     ? "var(--mantine-color-blue-6)"
-                    : `var(--mantine-color-gray-${interactive ? 1 : 2})`,
+                    : "var(--pp-dot-off)",
                 }}
               />
             );

@@ -4,14 +4,14 @@ import {
   directionAngle,
   type SemaphoreDirection,
   type SemaphorePair,
-} from "../../lib/semaphore";
+} from "#/lib/semaphore.ts";
 
 const PIVOT = { x: 100, y: 90 };
 const ARM_LENGTH = 40;
 const FLAG_SIZE = 26;
 const GUIDE_RADIUS = 82;
 const DIRECTIONS: SemaphoreDirection[] = [0, 1, 2, 3, 4, 5, 6, 7];
-const BODY_COLOR = "#2C2E33";
+const BODY_COLOR = "var(--pp-figure)";
 
 /** Point `dist` from the shoulder pivot towards `dir`, plus the unit vector used. */
 function polar(dir: SemaphoreDirection, dist: number) {
@@ -48,7 +48,7 @@ function ArmWithFlag({ dir }: { dir: SemaphoreDirection }) {
         y1={hand.y}
         x2={tip.x}
         y2={tip.y}
-        stroke="#5C5F66"
+        stroke={BODY_COLOR}
         strokeWidth="3"
       />
       <polygon
@@ -95,16 +95,18 @@ function DirectionGuide({
         y1={PIVOT.y}
         x2={x}
         y2={y}
-        stroke="var(--mantine-color-gray-3)"
+        stroke="var(--pp-guide)"
         strokeWidth="1"
         strokeDasharray="2 2"
       />
       <circle
         cx={x}
         cy={y}
-        r={selected ? 10 : 8}
-        fill={`var(--mantine-color-${selected ? "blue-6" : "gray-2"})`}
-        stroke={`var(--mantine-color-${selected ? "blue-8" : "gray-4"})`}
+        r={selected ? 11 : 9}
+        fill={selected ? "var(--mantine-color-blue-6)" : "var(--pp-dot-off)"}
+        stroke={
+          selected ? "var(--mantine-color-blue-8)" : "var(--pp-dot-off-border)"
+        }
         strokeWidth="1.5"
         className="transition-all duration-150"
       />
@@ -112,8 +114,8 @@ function DirectionGuide({
         x={x}
         y={y + 3.5}
         textAnchor="middle"
-        fill={selected ? "#fff" : "var(--mantine-color-gray-7)"}
-        fontSize="9"
+        fill={selected ? "#fff" : "var(--mantine-color-text)"}
+        fontSize="10"
         fontWeight="bold"
         className="pointer-events-none select-none"
       >
@@ -139,7 +141,7 @@ export function SemaphorePerson({
       withBorder
       p="xs"
       radius="md"
-      bg={interactive ? "var(--mantine-color-gray-0)" : "transparent"}
+      bg={interactive ? "var(--pp-surface)" : "transparent"}
       shadow={interactive ? "xs" : undefined}
     >
       <svg
@@ -165,14 +167,7 @@ export function SemaphorePerson({
           <line x1="100" y1="135" x2="116" y2="180" strokeWidth="4" />
           <line x1="100" y1="80" x2="100" y2="135" strokeWidth="6" />
         </g>
-        <circle
-          cx="100"
-          cy="65"
-          r="12"
-          fill="#495057"
-          stroke="#212529"
-          strokeWidth="1.5"
-        />
+        <circle cx="100" cy="65" r="12" fill={BODY_COLOR} />
 
         <ArmWithFlag dir={p1} />
         {p1 !== p2 && <ArmWithFlag dir={p2} />}

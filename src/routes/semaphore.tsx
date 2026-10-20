@@ -34,8 +34,7 @@ function SemaphorePage() {
 
   return (
     <ToolView
-      title="Semaphore"
-      icon="🚩"
+      tool="/semaphore"
       encode={{
         input: encodeInput,
         onInputChange: setEncodeInput,
@@ -56,7 +55,7 @@ function SemaphorePage() {
             <Text size="xs" fw={700}>
               {item.char === " " ? "SPACE" : item.char}
             </Text>
-            <Text fz={10} c="dimmed">
+            <Text size="xs" c="dimmed">
               {pairLabel(item.positions)}
             </Text>
           </SymbolTile>
@@ -133,7 +132,7 @@ function SemaphorePage() {
               <Text size="xs" fw={600} c="dimmed">
                 {pairLabel(positions)}
               </Text>
-              <Text fz={10} c="dimmed">
+              <Text size="xs" c="dimmed">
                 {DIRECTION_NAMES[positions[0]]} /{" "}
                 {DIRECTION_NAMES[positions[1]]}
               </Text>

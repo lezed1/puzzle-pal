@@ -38,8 +38,7 @@ function BraillePage() {
 
   return (
     <ToolView
-      title="Braille"
-      icon="⠃"
+      tool="/braille"
       encode={{
         input: encodeInput,
         onInputChange: setEncodeInput,
@@ -71,7 +70,7 @@ function BraillePage() {
                   {ch === "\n" ? "ENTER" : ch === " " ? "SPACE" : ch}
                 </Text>
               )}
-              <Text size="xs" fw={700}>
+              <Text size="lg" lh={1}>
                 {ch}
               </Text>
             </SymbolTile>
@@ -98,7 +97,7 @@ function BraillePage() {
                 </Text>
                 <Text size="xs">
                   Char:{" "}
-                  <Text span fw={700} size="sm">
+                  <Text span size="xl">
                     {pinpadUnicode}
                   </Text>
                 </Text>
@@ -147,7 +146,7 @@ function BraillePage() {
               <Text size="xs" fw={600} c="dimmed">
                 {item.dotString}
               </Text>
-              <Text size="xs" c="blue" fw={700}>
+              <Text size="xl" c="blue" lh={1}>
                 {item.unicode}
               </Text>
             </>

@@ -20,7 +20,7 @@ const CATEGORY_FILTERS = [
   { label: "All", value: "all" },
   { label: "Letters", value: "letter" },
   { label: "Numbers", value: "number" },
-  { label: "Punctuation / Special", value: "other" },
+  { label: "Symbols", value: "other" },
 ];
 
 const matchesCategory = (item: ReferenceItem, filter: string) =>
@@ -80,7 +80,7 @@ export function ReferenceTable<T extends ReferenceItem>({
               ta="center"
             >
               <Stack align="center" gap={4}>
-                <Text fw={700} size="md">
+                <Text fw={700} size="lg">
                   {item.char}
                 </Text>
                 {renderSymbol(item)}

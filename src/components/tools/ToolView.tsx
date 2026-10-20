@@ -9,6 +9,7 @@ import {
   Stack,
   Text,
   Textarea,
+  ThemeIcon,
   Title,
 } from "@mantine/core";
 import {
@@ -18,6 +19,7 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 import { type ReactNode, useState } from "react";
+import { TOOLS } from "../layout/AppLayout";
 
 type ToolMode = "encode" | "decode" | "reference";
 
@@ -30,32 +32,27 @@ interface PanelProps {
 }
 
 export interface ToolViewProps {
-  title: string;
-  icon: ReactNode;
+  tool: (typeof TOOLS)[number]["to"];
   encode: PanelProps & { visualOutput?: ReactNode };
   decode: PanelProps & { interactiveWidget?: ReactNode };
   reference: ReactNode;
 }
 
-export function ToolView({
-  title,
-  icon,
-  encode,
-  decode,
-  reference,
-}: ToolViewProps) {
+export function ToolView({ tool, encode, decode, reference }: ToolViewProps) {
   const [mode, setMode] = useState<ToolMode>("encode");
+  // biome-ignore lint/style/noNonNullAssertion: `tool` is typed to TOOLS paths
+  const { label, icon: Icon, color } = TOOLS.find((t) => t.to === tool)!;
 
   return (
     <Stack gap="md">
       <Paper withBorder p="sm" radius="md">
         <Group justify="space-between" wrap="wrap" gap="sm">
           <Group gap="xs">
-            <Box fz={24} lh={1}>
-              {icon}
-            </Box>
+            <ThemeIcon size={36} radius="md" color={color} variant="light">
+              <Icon size={22} />
+            </ThemeIcon>
             <Title order={2} size="h3">
-              {title}
+              {label}
             </Title>
           </Group>
           <SegmentedControl
@@ -161,6 +158,7 @@ function InputCard({
       </Group>
       <Textarea
         placeholder={placeholder}
+        size="md"
         minRows={3}
         maxRows={8}
         autosize
@@ -182,7 +180,7 @@ function OutputCard({
   children?: ReactNode;
 }) {
   return (
-    <Card withBorder radius="md" p="md" bg="var(--mantine-color-gray-0)">
+    <Card withBorder radius="md" p="md" bg="var(--pp-surface)">
       <Group justify="space-between" mb="xs">
         <Text fw={600} size="sm">
           {title}
@@ -207,12 +205,20 @@ function OutputCard({
       <Paper withBorder p="sm" radius="sm" bg="var(--mantine-color-body)">
         <Text
           ff="monospace"
-          fz={16}
+          fz={18}
           mih={40}
-          className="whitespace-pre-wrap break-words"
+          className="whitespace-pre-wrap"
           c={value ? undefined : "dimmed"}
         >
-          {value || "—"}
+          {/* Inline-block tokens stop browsers line-breaking after "-" mid Morse letter. */}
+          {value
+            ? value.split(/(\s+)/).map((token, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: tokens are derived and never reordered
+                <span key={i} className="inline-block max-w-full wrap-anywhere">
+                  {token}
+                </span>
+              ))
+            : "—"}
         </Text>
       </Paper>
       {children}
