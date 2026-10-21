@@ -3,7 +3,6 @@ import {
   DIRECTION_NAMES,
   directionAngle,
   type SemaphoreDirection,
-  type SemaphorePair,
 } from "#/lib/semaphore.ts";
 
 const PIVOT = { x: 100, y: 90 };
@@ -84,7 +83,7 @@ function DirectionGuide({
       tabIndex={0}
       aria-label={DIRECTION_NAMES[dir]}
       aria-pressed={selected}
-      className="cursor-pointer"
+      className="cursor-pointer not-focus-visible:outline-none"
       onClick={() => onSelect?.(dir)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") onSelect?.(dir);
@@ -126,12 +125,12 @@ function DirectionGuide({
 }
 
 export function SemaphorePerson({
-  positions: [p1, p2],
+  positions,
   interactive = false,
   onSelectPosition,
   size = 140,
 }: {
-  positions: SemaphorePair;
+  positions: SemaphoreDirection[];
   interactive?: boolean;
   onSelectPosition?: (dir: SemaphoreDirection) => void;
   size?: number;
@@ -157,20 +156,25 @@ export function SemaphorePerson({
             <DirectionGuide
               key={dir}
               dir={dir}
-              selected={dir === p1 || dir === p2}
+              selected={positions.includes(dir)}
               onSelect={onSelectPosition}
             />
           ))}
 
-        <g stroke={BODY_COLOR} strokeLinecap="round">
-          <line x1="100" y1="135" x2="84" y2="180" strokeWidth="4" />
-          <line x1="100" y1="135" x2="116" y2="180" strokeWidth="4" />
-          <line x1="100" y1="80" x2="100" y2="135" strokeWidth="6" />
-        </g>
-        <circle cx="100" cy="65" r="12" fill={BODY_COLOR} />
+        {!interactive && (
+          <>
+            <g stroke={BODY_COLOR} strokeLinecap="round">
+              <line x1="100" y1="135" x2="84" y2="180" strokeWidth="4" />
+              <line x1="100" y1="135" x2="116" y2="180" strokeWidth="4" />
+              <line x1="100" y1="80" x2="100" y2="135" strokeWidth="6" />
+            </g>
+            <circle cx="100" cy="65" r="12" fill={BODY_COLOR} />
+          </>
+        )}
 
-        <ArmWithFlag dir={p1} />
-        {p1 !== p2 && <ArmWithFlag dir={p2} />}
+        {[...new Set(positions)].map((dir) => (
+          <ArmWithFlag key={dir} dir={dir} />
+        ))}
       </svg>
     </Paper>
   );

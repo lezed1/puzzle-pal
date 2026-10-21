@@ -1,4 +1,6 @@
-import { Button, Checkbox, Flex, SimpleGrid, Text } from "@mantine/core";
+import { Box, Button, Checkbox, Flex, SimpleGrid, Text } from "@mantine/core";
+import { useTimeout } from "@mantine/hooks";
+import { IconBackspace } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { SemaphorePerson } from "../components/semaphore/SemaphorePerson";
@@ -24,13 +26,45 @@ function SemaphorePage() {
   const [encodeInput, setEncodeInput] = useState("FLAG");
   const [includeNumberSign, setIncludeNumberSign] = useState(true);
   const [decodeInput, setDecodeInput] = useState("0,6 1,5 0,1 0,7");
-  const [arms, setArms] = useState<SemaphorePair>([0, 1]);
+  const [firstArm, setFirstArm] = useState<SemaphoreDirection | null>(null);
+  // Briefly shows the signal just added before the figure resets.
+  const [flash, setFlash] = useState<SemaphorePair | null>(null);
+  const flashTimeout = useTimeout(() => setFlash(null), 700);
+  const stopFlash = () => {
+    flashTimeout.clear();
+    setFlash(null);
+  };
 
-  // Clicking a raised arm drops it onto the other; otherwise the oldest arm moves.
-  const selectDirection = (dir: SemaphoreDirection) =>
-    setArms(([a, b]) => (dir === a ? [b, b] : dir === b ? [a, a] : [b, dir]));
+  const selectDirection = (dir: SemaphoreDirection) => {
+    stopFlash();
+    if (firstArm === null) {
+      setFirstArm(dir);
+      return;
+    }
+    const pair: SemaphorePair = [firstArm, dir];
+    setFirstArm(null);
+    setFlash(pair);
+    flashTimeout.start();
+    setDecodeInput((prev) =>
+      prev ? `${prev} ${pairLabel(pair)}` : pairLabel(pair),
+    );
+  };
+
+  // A half-picked signal is discarded before any committed token.
+  const backspace = () => {
+    stopFlash();
+    if (firstArm !== null) {
+      setFirstArm(null);
+      return;
+    }
+    setDecodeInput((prev) => prev.trimEnd().replace(/\S+$/, "").trimEnd());
+  };
 
   const encoded = encodeToSemaphore(encodeInput, includeNumberSign);
+  const flashChar = flash && decodeFromSemaphorePositions([flash]);
+  // The number sign decodes to "" and rest to " ", so give them visible labels.
+  const flashLabel =
+    flashChar === "" ? "#" : flashChar === " " ? "␣" : flashChar;
 
   return (
     <ToolView
@@ -72,12 +106,27 @@ function SemaphorePage() {
             direction={{ base: "column", sm: "row" }}
             align={{ base: "center", sm: "stretch" }}
           >
-            <SemaphorePerson
-              positions={arms}
-              interactive
-              onSelectPosition={selectDirection}
-              size={240}
-            />
+            <Box pos="relative">
+              <SemaphorePerson
+                positions={flash ?? (firstArm === null ? [] : [firstArm])}
+                interactive
+                onSelectPosition={selectDirection}
+                size={240}
+              />
+              {flash && (
+                <Text
+                  pos="absolute"
+                  top={8}
+                  right={12}
+                  fz={36}
+                  fw={700}
+                  c="blue"
+                  className="pointer-events-none"
+                >
+                  {flashLabel}
+                </Text>
+              )}
+            </Box>
             <SimpleGrid
               cols={{ base: 2, sm: 1 }}
               spacing="xs"
@@ -85,18 +134,6 @@ function SemaphorePage() {
               maw={{ sm: 240 }}
               className="content-center"
             >
-              <Button
-                size="md"
-                px="xs"
-                className="col-span-full"
-                onClick={() =>
-                  setDecodeInput((prev) =>
-                    prev ? `${prev} ${pairLabel(arms)}` : pairLabel(arms),
-                  )
-                }
-              >
-                Add “{decodeFromSemaphorePositions([arms]) || pairLabel(arms)}”
-              </Button>
               <Button
                 variant="light"
                 color="gray"
@@ -109,13 +146,14 @@ function SemaphorePage() {
                 Space
               </Button>
               <Button
-                variant="subtle"
+                variant="light"
                 color="red"
                 size="md"
                 px="xs"
-                onClick={() => setArms([0, 0])}
+                leftSection={<IconBackspace size={18} />}
+                onClick={backspace}
               >
-                Reset
+                Backspace
               </Button>
             </SimpleGrid>
           </Flex>
