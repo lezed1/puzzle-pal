@@ -95,7 +95,7 @@ function BraillePage() {
         output: text,
         sampleText: "125 15 123 123 135 / 1234 1 123",
         interactiveWidget: (
-          <Group gap="md" wrap="nowrap" align="stretch">
+          <Group gap="md" wrap="nowrap" align="stretch" justify="center">
             <BrailleCell
               dots={pinpadDots}
               interactive

@@ -113,6 +113,7 @@ function SemaphorePage() {
           <Flex
             gap="md"
             direction={{ base: "column", sm: "row" }}
+            justify="center"
             align={{ base: "center", sm: "stretch" }}
           >
             <Box pos="relative">

@@ -20,6 +20,7 @@ export function MorseTapPad({
           key={label}
           variant="light"
           color={label.startsWith("⌫") ? "red" : "blue"}
+          className={label.startsWith("⌫") ? "col-span-2" : undefined}
           size="lg"
           h={72}
           px="xs"

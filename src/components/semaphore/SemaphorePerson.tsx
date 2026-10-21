@@ -144,7 +144,8 @@ export function SemaphorePerson({
       shadow={interactive ? "xs" : undefined}
     >
       <svg
-        viewBox="0 0 200 200"
+        // The guide circle has no body below it, so center the viewBox on the pivot.
+        viewBox={`0 ${interactive ? PIVOT.y - 100 : 0} 200 200`}
         width={size}
         height={size}
         className="overflow-visible"
