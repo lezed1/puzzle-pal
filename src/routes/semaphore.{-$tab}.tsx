@@ -1,59 +1,44 @@
 import { Box, Button, Checkbox, Flex, SimpleGrid, Text } from "@mantine/core";
 import { useTimeout } from "@mantine/hooks";
 import { IconBackspace } from "@tabler/icons-react";
-import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
 import { SemaphorePerson } from "../components/semaphore/SemaphorePerson";
 import { ReferenceTable } from "../components/tools/ReferenceTable";
 import { SymbolTile, ToolView } from "../components/tools/ToolView";
 import {
-  parseTextSearch,
-  type TextDraft,
-  tabParams,
-  useTextDraft,
+  setting,
+  toolRouteOptions,
+  useToolState,
 } from "../components/tools/toolUrlState";
 import {
   DIRECTION_NAMES,
+  decodeFromSemaphore,
   decodeFromSemaphorePositions,
   encodeToSemaphore,
-  parseSemaphorePairs,
+  pairLabel,
   SEMAPHORE_REFERENCE_LIST,
   type SemaphoreDirection,
   type SemaphorePair,
-  type SemaphoreSignal,
+  semaphoreSignalsToCode,
 } from "../lib/semaphore";
 
-interface SemaphoreSearch extends TextDraft {
-  num: boolean;
-}
-
-const DEFAULTS = { text: "FLAG", num: true } satisfies SemaphoreSearch;
-
 export const Route = createFileRoute("/semaphore/{-$tab}")({
-  params: tabParams,
-  validateSearch: (
-    s: Partial<Record<keyof SemaphoreSearch, unknown>>,
-  ): SemaphoreSearch => ({
-    ...parseTextSearch(s, DEFAULTS.text),
-    num: s.num !== false,
-  }),
-  search: { middlewares: [stripSearchParams(DEFAULTS)] },
+  ...toolRouteOptions("FLAG", { num: setting(z.boolean(), true) }),
   component: SemaphorePage,
 });
 
-const pairLabel = ([a, b]: SemaphorePair) => `${a},${b}`;
-const toCode = (signals: SemaphoreSignal[]) =>
-  signals.map((e) => (e.char === " " ? "/" : pairLabel(e.positions))).join(" ");
-const decode = (code: string) =>
-  decodeFromSemaphorePositions(parseSemaphorePairs(code));
+// The decode side always marks digits, or they'd decode as letters.
+const encode = (text: string) =>
+  semaphoreSignalsToCode(encodeToSemaphore(text));
 
 function SemaphorePage() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const update = (patch: Partial<SemaphoreSearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
-  const { draft, setText, setCode } = useTextDraft(search, update, decode);
-  const decodeInput = draft.code ?? toCode(encodeToSemaphore(draft.text));
+  const { search, update, text, code, setText, setCode } = useToolState(
+    Route.useSearch(),
+    encode,
+    decodeFromSemaphore,
+  );
   const [firstArm, setFirstArm] = useState<SemaphoreDirection | null>(null);
   // Briefly shows the signal just added before the figure resets.
   const [flash, setFlash] = useState<SemaphorePair | null>(null);
@@ -73,9 +58,7 @@ function SemaphorePage() {
     setFirstArm(null);
     setFlash(pair);
     flashTimeout.start();
-    setCode(
-      decodeInput ? `${decodeInput} ${pairLabel(pair)}` : pairLabel(pair),
-    );
+    setCode(code ? `${code} ${pairLabel(pair)}` : pairLabel(pair));
   };
 
   // A half-picked signal is discarded before any committed token.
@@ -85,10 +68,10 @@ function SemaphorePage() {
       setFirstArm(null);
       return;
     }
-    setCode(decodeInput.trimEnd().replace(/\S+$/, "").trimEnd());
+    setCode(code.trimEnd().replace(/\S+$/, "").trimEnd());
   };
 
-  const encoded = encodeToSemaphore(draft.text, search.num);
+  const encoded = encodeToSemaphore(text, search.num);
   const flashChar = flash && decodeFromSemaphorePositions([flash]);
   // The number sign decodes to "" and rest to " ", so give them visible labels.
   const flashLabel =
@@ -98,9 +81,9 @@ function SemaphorePage() {
     <ToolView
       tool="/semaphore"
       encode={{
-        input: draft.text,
+        input: text,
         onInputChange: setText,
-        output: toCode(encoded),
+        output: semaphoreSignalsToCode(encoded),
         sampleText: "SECRET SIGNAL",
         controls: (
           <Checkbox
@@ -122,9 +105,9 @@ function SemaphorePage() {
         )),
       }}
       decode={{
-        input: decodeInput,
+        input: code,
         onInputChange: setCode,
-        output: draft.text,
+        output: text,
         sampleText: "0,6 1,5 0,1 0,7 / 2,4 0,1 1,5",
         interactiveWidget: (
           <Flex
@@ -165,7 +148,7 @@ function SemaphorePage() {
                 color="gray"
                 size="md"
                 px="xs"
-                onClick={() => setCode(decodeInput ? `${decodeInput} /` : "/")}
+                onClick={() => setCode(code ? `${code} /` : "/")}
               >
                 Space
               </Button>

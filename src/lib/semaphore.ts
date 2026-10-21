@@ -121,6 +121,12 @@ export function encodeToSemaphore(
   return result;
 }
 
+export const pairLabel = ([a, b]: SemaphorePair) => `${a},${b}`;
+
+/** Text form of signals, e.g. "0,1 0,2 / 0,3", as accepted by `decodeFromSemaphore`. */
+export const semaphoreSignalsToCode = (signals: SemaphoreSignal[]) =>
+  signals.map((s) => (s.char === " " ? "/" : pairLabel(s.positions))).join(" ");
+
 /** Parses tokens like "0,1 0-2 0:3", where "/" or "|" denotes a space. */
 export function parseSemaphorePairs(input: string): SemaphorePair[] {
   const pairs: SemaphorePair[] = [];
@@ -168,3 +174,6 @@ export function decodeFromSemaphorePositions(pairs: SemaphorePair[]): string {
 
   return output;
 }
+
+export const decodeFromSemaphore = (code: string) =>
+  decodeFromSemaphorePositions(parseSemaphorePairs(code));

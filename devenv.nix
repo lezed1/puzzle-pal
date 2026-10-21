@@ -21,7 +21,6 @@
 
     javascript = {
       enable = true;
-      directory = "./frontend";
       corepack.enable = true;
       npm = {
         enable = true;
@@ -49,22 +48,15 @@
         enable = true;
         formatCommand = "check";
         validate.enable = false;
-        excludes = [
-          "frontend/**"
-          "**.gen.ts"
-        ];
-        settings = {
-          formatter = {
-            indentStyle = "space";
-          };
-          css = {
-            parser = {
-              tailwindDirectives = true;
-            };
-          };
-        };
       };
     };
+    # Drop treefmt-nix's generated --config-path so Biome reads the repo's biome.json,
+    # keeping treefmt, `npx biome`, and editors on one config.
+    config.settings.formatter.biome.options = lib.mkForce [
+      "check"
+      "--write"
+      "--no-errors-on-unmatched"
+    ];
   };
 
   # See full reference at https://devenv.sh/reference/options/

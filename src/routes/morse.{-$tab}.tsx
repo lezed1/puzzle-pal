@@ -1,13 +1,13 @@
 import { Badge, Group, Select } from "@mantine/core";
-import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { MorseTapPad } from "../components/morse/MorseTapPad";
 import { ReferenceTable } from "../components/tools/ReferenceTable";
 import { ToolView } from "../components/tools/ToolView";
 import {
-  parseTextSearch,
-  type TextDraft,
-  tabParams,
-  useTextDraft,
+  setting,
+  toolRouteOptions,
+  useToolState,
 } from "../components/tools/toolUrlState";
 import {
   decodeFromMorse,
@@ -25,69 +25,34 @@ const WORD_SEPARATORS = {
   pipe: { sep: " | ", label: "Pipe (' | ')" },
   spaces: { sep: "   ", label: "3 Spaces ('   ')" },
 };
-type LetterSep = keyof typeof LETTER_SEPARATORS;
-type WordSep = keyof typeof WORD_SEPARATORS;
 
 const toSelectData = (seps: Record<string, { label: string }>) =>
   Object.entries(seps).map(([value, { label }]) => ({ value, label }));
-
-const oneOf = <T extends string>(
-  v: unknown,
-  options: readonly T[],
-  fallback: T,
-) => (options.includes(v as T) ? (v as T) : fallback);
-
-interface MorseSearch extends TextDraft {
-  sep: LetterSep;
-  wsep: WordSep;
-}
-
-const DEFAULTS = {
-  text: "SOS PUZZLE",
-  sep: "space",
-  wsep: "slash",
-} satisfies MorseSearch;
+const keys = <T extends object>(o: T) =>
+  Object.keys(o) as [keyof T & string, ...(keyof T & string)[]];
 
 export const Route = createFileRoute("/morse/{-$tab}")({
-  params: tabParams,
-  validateSearch: (
-    s: Partial<Record<keyof MorseSearch, unknown>>,
-  ): MorseSearch => ({
-    ...parseTextSearch(s, DEFAULTS.text),
-    sep: oneOf(
-      s.sep,
-      Object.keys(LETTER_SEPARATORS) as LetterSep[],
-      DEFAULTS.sep,
-    ),
-    wsep: oneOf(
-      s.wsep,
-      Object.keys(WORD_SEPARATORS) as WordSep[],
-      DEFAULTS.wsep,
-    ),
+  ...toolRouteOptions("SOS PUZZLE", {
+    sep: setting(z.enum(keys(LETTER_SEPARATORS)), "space"),
+    wsep: setting(z.enum(keys(WORD_SEPARATORS)), "slash"),
   }),
-  search: { middlewares: [stripSearchParams(DEFAULTS)] },
   component: MorsePage,
 });
 
 function MorsePage() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const update = (patch: Partial<MorseSearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
-  const { draft, setText, setCode } = useTextDraft(
-    search,
-    update,
+  const { search, update, text, code, setText, setCode } = useToolState(
+    Route.useSearch(),
+    encodeToMorse,
     decodeFromMorse,
   );
-  const decodeInput = draft.code ?? encodeToMorse(draft.text);
 
   return (
     <ToolView
       tool="/morse"
       encode={{
-        input: draft.text,
+        input: text,
         onInputChange: setText,
-        output: encodeToMorse(draft.text, {
+        output: encodeToMorse(text, {
           letterSeparator: LETTER_SEPARATORS[search.sep].sep,
           wordSeparator: WORD_SEPARATORS[search.wsep].sep,
         }),
@@ -100,7 +65,9 @@ function MorsePage() {
               w={140}
               data={toSelectData(LETTER_SEPARATORS)}
               value={search.sep}
-              onChange={(val) => val && update({ sep: val as LetterSep })}
+              onChange={(val) =>
+                val && update({ sep: val as typeof search.sep })
+              }
             />
             <Select
               label="Word Separator"
@@ -108,18 +75,20 @@ function MorsePage() {
               w={160}
               data={toSelectData(WORD_SEPARATORS)}
               value={search.wsep}
-              onChange={(val) => val && update({ wsep: val as WordSep })}
+              onChange={(val) =>
+                val && update({ wsep: val as typeof search.wsep })
+              }
             />
           </Group>
         ),
       }}
       decode={{
-        input: decodeInput,
+        input: code,
         onInputChange: setCode,
-        output: draft.text,
+        output: text,
         sampleText: ".... . .-.. .-.. --- / .-- --- .-. .-.. -..",
         interactiveWidget: (
-          <MorseTapPad onChange={(apply) => setCode(apply(decodeInput))} />
+          <MorseTapPad onChange={(apply) => setCode(apply(code))} />
         ),
       }}
       reference={

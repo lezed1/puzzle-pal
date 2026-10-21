@@ -1,14 +1,14 @@
 import { Button, Checkbox, Group, Stack, Text } from "@mantine/core";
-import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
 import { BrailleCell } from "../components/braille/BrailleCell";
 import { ReferenceTable } from "../components/tools/ReferenceTable";
 import { SymbolTile, ToolView } from "../components/tools/ToolView";
 import {
-  parseTextSearch,
-  type TextDraft,
-  tabParams,
-  useTextDraft,
+  setting,
+  toolRouteOptions,
+  useToolState,
 } from "../components/tools/toolUrlState";
 import {
   BRAILLE_REFERENCE_LIST,
@@ -19,41 +19,20 @@ import {
   unicodeToDots,
 } from "../lib/braille";
 
-interface BrailleSearch extends TextDraft {
-  num: boolean;
-  cap: boolean;
-}
-
-const DEFAULTS = {
-  text: "PUZZLE PAL",
-  num: false,
-  cap: false,
-} satisfies BrailleSearch;
-
 export const Route = createFileRoute("/braille/{-$tab}")({
-  params: tabParams,
-  validateSearch: (
-    s: Partial<Record<keyof BrailleSearch, unknown>>,
-  ): BrailleSearch => ({
-    ...parseTextSearch(s, DEFAULTS.text),
-    num: s.num === true,
-    cap: s.cap === true,
+  ...toolRouteOptions("PUZZLE PAL", {
+    num: setting(z.boolean(), false),
+    cap: setting(z.boolean(), false),
   }),
-  search: { middlewares: [stripSearchParams(DEFAULTS)] },
   component: BraillePage,
 });
 
 function BraillePage() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const update = (patch: Partial<BrailleSearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
-  const { draft, setText, setCode } = useTextDraft(
-    search,
-    update,
+  const { search, update, text, code, setText, setCode } = useToolState(
+    Route.useSearch(),
+    encodeToBraille,
     decodeFromBraille,
   );
-  const decodeInput = draft.code ?? encodeToBraille(draft.text);
   const [pinpadDots, setPinpadDots] = useState<number[]>([1]);
 
   const toggleDot = (dot: number) =>
@@ -64,7 +43,7 @@ function BraillePage() {
     );
 
   const pinpadUnicode = dotsToUnicode(pinpadDots);
-  const cells = encodeToBrailleCells(draft.text, {
+  const cells = encodeToBrailleCells(text, {
     includeNumberSign: search.num,
     includeCapitalSign: search.cap,
   });
@@ -73,7 +52,7 @@ function BraillePage() {
     <ToolView
       tool="/braille"
       encode={{
-        input: draft.text,
+        input: text,
         onInputChange: setText,
         output: cells.map((c) => c.cell).join(""),
         sampleText: "ESCAPE ROOM 2026",
@@ -111,9 +90,9 @@ function BraillePage() {
         }),
       }}
       decode={{
-        input: decodeInput,
+        input: code,
         onInputChange: setCode,
-        output: draft.text,
+        output: text,
         sampleText: "125 15 123 123 135 / 1234 1 123",
         interactiveWidget: (
           <Group gap="md" wrap="nowrap" align="stretch">
@@ -133,7 +112,7 @@ function BraillePage() {
               <Button
                 size="md"
                 px="xs"
-                onClick={() => setCode(decodeInput + pinpadUnicode)}
+                onClick={() => setCode(code + pinpadUnicode)}
                 disabled={pinpadDots.length === 0}
               >
                 {pinpadDots.length
@@ -145,7 +124,7 @@ function BraillePage() {
                 color="gray"
                 size="md"
                 px="xs"
-                onClick={() => setCode(`${decodeInput} `)}
+                onClick={() => setCode(`${code} `)}
               >
                 Space
               </Button>

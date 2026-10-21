@@ -21,9 +21,7 @@ import {
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { TOOLS } from "../layout/AppLayout";
-
-export const TOOL_MODES = ["encode", "decode", "reference"] as const;
-export type ToolMode = (typeof TOOL_MODES)[number];
+import type { ToolMode } from "./toolUrlState";
 
 interface PanelProps {
   input: string;

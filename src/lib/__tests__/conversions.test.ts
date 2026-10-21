@@ -6,9 +6,11 @@ import {
 } from "../braille";
 import { decodeFromMorse, encodeToMorse } from "../morse";
 import {
+  decodeFromSemaphore,
   decodeFromSemaphorePositions,
   encodeToSemaphore,
   parseSemaphorePairs,
+  semaphoreSignalsToCode,
 } from "../semaphore";
 
 describe("braille", () => {
@@ -64,11 +66,9 @@ describe("morse", () => {
 });
 
 describe("semaphore", () => {
-  it("round-trips text with digits and spaces", () => {
-    const encoded = encodeToSemaphore("Agent 007");
-    expect(decodeFromSemaphorePositions(encoded.map((e) => e.positions))).toBe(
-      "AGENT 007",
-    );
+  it("round-trips text with digits and spaces through the code form", () => {
+    const code = semaphoreSignalsToCode(encodeToSemaphore("Agent 007"));
+    expect(decodeFromSemaphore(code)).toBe("AGENT 007");
   });
 
   it("treats arm order as irrelevant when decoding", () => {
