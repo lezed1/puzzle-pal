@@ -10,9 +10,6 @@ import { z } from "zod";
 export const TOOL_MODES = ["encode", "decode", "reference"] as const;
 export type ToolMode = (typeof TOOL_MODES)[number];
 
-// Shared by every tool so text carries over unchanged when switching between them.
-const DEFAULT_TEXT = "PUZZLE PAL";
-
 /** A search param that falls back to `value` when missing or invalid. */
 export const setting = <T extends z.ZodType>(
   schema: T,
@@ -20,15 +17,13 @@ export const setting = <T extends z.ZodType>(
 ) => schema.default(value).catch(value);
 
 /**
- * Route options shared by every tool: the optional `{-$tab}` segment, plus a plain-text
- * `text` search param alongside the tool's own settings, with defaults stripped from the URL.
+ * Route options shared by every tool: the optional `{-$tab}` segment and the tool's own
+ * settings as search params, with defaults stripped from the URL. `text` lives on the root.
  */
 export function toolRouteOptions<T extends z.ZodRawShape>(settings: T) {
-  const schema = z.object({
-    // The default search parser JSON-decodes values, so "123" arrives as a number.
-    text: setting(z.coerce.string(), DEFAULT_TEXT),
-    ...settings,
-  });
+  const schema = z.object(settings);
+  // Child middlewares see the full search, including the root's `text`.
+  type Search = z.output<typeof schema> & { text: string };
   return {
     params: {
       parse: ({ tab }: { tab?: string }) => {
@@ -40,7 +35,7 @@ export function toolRouteOptions<T extends z.ZodRawShape>(settings: T) {
     validateSearch: schema,
     search: {
       middlewares: [
-        stripSearchParams<z.output<typeof schema>>(schema.parse({})),
+        stripSearchParams<Search>(schema.parse({}) as Partial<Search>),
       ],
     },
   };
@@ -97,3 +92,8 @@ export function useToolState<S extends { text: string }>(
     setCode: (code: string) => edit({ text: decode(code), code }),
   };
 }
+
+export type ToolState = Pick<
+  ReturnType<typeof useToolState>,
+  "text" | "code" | "setText" | "setCode"
+>;

@@ -28,11 +28,12 @@ export const Route = createFileRoute("/braille/{-$tab}")({
 });
 
 function BraillePage() {
-  const { search, update, text, code, setText, setCode } = useToolState(
+  const state = useToolState(
     Route.useSearch(),
     encodeToBraille,
     decodeFromBraille,
   );
+  const { search, update, text, code, setCode } = state;
   const [pinpadDots, setPinpadDots] = useState<number[]>([1]);
 
   const toggleDot = (dot: number) =>
@@ -51,96 +52,82 @@ function BraillePage() {
   return (
     <ToolView
       tool="/braille"
-      encode={{
-        input: text,
-        onInputChange: setText,
-        output: cells.map((c) => c.cell).join(""),
-        sampleText: "ESCAPE ROOM 2026",
-        controls: (
-          <Group gap="lg">
-            <Checkbox
-              label="Include Number Prefix (⠼)"
-              checked={search.num}
-              onChange={(e) => update({ num: e.currentTarget.checked })}
-            />
-            <Checkbox
-              label="Include Capital Prefix (⠠)"
-              checked={search.cap}
-              onChange={(e) => update({ cap: e.currentTarget.checked })}
-            />
-          </Group>
-        ),
-        visualOutput: cells.map(({ label, cell }, i) => {
-          const dots = unicodeToDots(cell);
-          return (
-            // biome-ignore lint/suspicious/noArrayIndexKey: output is derived and never reordered
-            <SymbolTile key={i} minWidth={44}>
-              {dots.length > 0 ? (
-                <BrailleCell dots={dots} size="sm" />
-              ) : (
-                <Text size="xs" c="dimmed" h={52} className="flex items-center">
-                  {cell === "\n" ? "ENTER" : cell === " " ? "SPACE" : cell}
-                </Text>
-              )}
-              <Text size="xs" fw={700}>
-                {label}
+      state={state}
+      output={cells.map((c) => c.cell).join("")}
+      sampleText="ESCAPE ROOM 2026"
+      decodePlaceholder="Braille (⠏⠥⠵) or dot numbers (125 15 / 1234)..."
+      controls={
+        <Group gap="lg">
+          <Checkbox
+            label="Include Number Prefix (⠼)"
+            checked={search.num}
+            onChange={(e) => update({ num: e.currentTarget.checked })}
+          />
+          <Checkbox
+            label="Include Capital Prefix (⠠)"
+            checked={search.cap}
+            onChange={(e) => update({ cap: e.currentTarget.checked })}
+          />
+        </Group>
+      }
+      visualOutput={cells.map(({ label, cell }, i) => {
+        const dots = unicodeToDots(cell);
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: output is derived and never reordered
+          <SymbolTile key={i} minWidth={44}>
+            {dots.length > 0 ? (
+              <BrailleCell dots={dots} size="sm" />
+            ) : (
+              <Text size="xs" c="dimmed" h={52} className="flex items-center">
+                {cell === "\n" ? "ENTER" : cell === " " ? "SPACE" : cell}
               </Text>
-            </SymbolTile>
-          );
-        }),
-      }}
-      decode={{
-        input: code,
-        onInputChange: setCode,
-        output: text,
-        sampleText: "125 15 123 123 135 / 1234 1 123",
-        interactiveWidget: (
-          <Group gap="md" wrap="nowrap" align="stretch" justify="center">
-            <BrailleCell
-              dots={pinpadDots}
-              interactive
-              onToggleDot={toggleDot}
-              size="xl"
-            />
-            <Stack
-              gap="xs"
-              justify="center"
-              className="flex-1"
-              miw={0}
-              maw={240}
+            )}
+            <Text size="xs" fw={700}>
+              {label}
+            </Text>
+          </SymbolTile>
+        );
+      })}
+      builder={
+        <Group gap="md" wrap="nowrap" align="stretch" justify="center">
+          <BrailleCell
+            dots={pinpadDots}
+            interactive
+            onToggleDot={toggleDot}
+            size="xl"
+          />
+          <Stack gap="xs" justify="center" className="flex-1" miw={0} maw={240}>
+            <Button
+              size="md"
+              px="xs"
+              onClick={() => setCode(code + pinpadUnicode)}
+              disabled={pinpadDots.length === 0}
             >
-              <Button
-                size="md"
-                px="xs"
-                onClick={() => setCode(code + pinpadUnicode)}
-                disabled={pinpadDots.length === 0}
-              >
-                {pinpadDots.length
-                  ? `Add “${decodeFromBraille(pinpadUnicode)}”`
-                  : "Add"}
-              </Button>
-              <Button
-                variant="light"
-                color="gray"
-                size="md"
-                px="xs"
-                onClick={() => setCode(`${code} `)}
-              >
-                Space
-              </Button>
-              <Button
-                variant="subtle"
-                color="red"
-                size="md"
-                px="xs"
-                onClick={() => setPinpadDots([])}
-              >
-                Clear
-              </Button>
-            </Stack>
-          </Group>
-        ),
-      }}
+              {pinpadDots.length
+                ? `Add “${decodeFromBraille(pinpadUnicode)}”`
+                : "Add"}
+            </Button>
+            <Button
+              variant="light"
+              color="gray"
+              size="md"
+              px="xs"
+              onClick={() => setCode(`${code} `)}
+            >
+              Space
+            </Button>
+            <Button
+              variant="subtle"
+              color="red"
+              size="md"
+              px="xs"
+              onClick={() => setPinpadDots([])}
+            >
+              Clear
+            </Button>
+          </Stack>
+        </Group>
+      }
       reference={
         <ReferenceTable
           items={BRAILLE_REFERENCE_LIST}

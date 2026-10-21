@@ -40,57 +40,41 @@ export const Route = createFileRoute("/morse/{-$tab}")({
 });
 
 function MorsePage() {
-  const { search, update, text, code, setText, setCode } = useToolState(
-    Route.useSearch(),
-    encodeToMorse,
-    decodeFromMorse,
-  );
+  const state = useToolState(Route.useSearch(), encodeToMorse, decodeFromMorse);
+  const { search, update, text, code, setCode } = state;
 
   return (
     <ToolView
       tool="/morse"
-      encode={{
-        input: text,
-        onInputChange: setText,
-        output: encodeToMorse(text, {
-          letterSeparator: LETTER_SEPARATORS[search.sep].sep,
-          wordSeparator: WORD_SEPARATORS[search.wsep].sep,
-        }),
-        sampleText: "MAYDAY SHIP SOS",
-        controls: (
-          <Group gap="md">
-            <Select
-              label="Letter Separator"
-              size="xs"
-              w={140}
-              data={toSelectData(LETTER_SEPARATORS)}
-              value={search.sep}
-              onChange={(val) =>
-                val && update({ sep: val as typeof search.sep })
-              }
-            />
-            <Select
-              label="Word Separator"
-              size="xs"
-              w={160}
-              data={toSelectData(WORD_SEPARATORS)}
-              value={search.wsep}
-              onChange={(val) =>
-                val && update({ wsep: val as typeof search.wsep })
-              }
-            />
-          </Group>
-        ),
-      }}
-      decode={{
-        input: code,
-        onInputChange: setCode,
-        output: text,
-        sampleText: ".... . .-.. .-.. --- / .-- --- .-. .-.. -..",
-        interactiveWidget: (
-          <MorseTapPad onChange={(apply) => setCode(apply(code))} />
-        ),
-      }}
+      state={state}
+      output={encodeToMorse(text, {
+        letterSeparator: LETTER_SEPARATORS[search.sep].sep,
+        wordSeparator: WORD_SEPARATORS[search.wsep].sep,
+      })}
+      sampleText="MAYDAY SHIP SOS"
+      controls={
+        <Group gap="md">
+          <Select
+            label="Letter Separator"
+            size="xs"
+            w={140}
+            data={toSelectData(LETTER_SEPARATORS)}
+            value={search.sep}
+            onChange={(val) => val && update({ sep: val as typeof search.sep })}
+          />
+          <Select
+            label="Word Separator"
+            size="xs"
+            w={160}
+            data={toSelectData(WORD_SEPARATORS)}
+            value={search.wsep}
+            onChange={(val) =>
+              val && update({ wsep: val as typeof search.wsep })
+            }
+          />
+        </Group>
+      }
+      builder={<MorseTapPad onChange={(apply) => setCode(apply(code))} />}
       reference={
         <ReferenceTable
           items={MORSE_REFERENCE_LIST}

@@ -34,11 +34,8 @@ const encode = (text: string) =>
   semaphoreSignalsToCode(encodeToSemaphore(text));
 
 function SemaphorePage() {
-  const { search, update, text, code, setText, setCode } = useToolState(
-    Route.useSearch(),
-    encode,
-    decodeFromSemaphore,
-  );
+  const state = useToolState(Route.useSearch(), encode, decodeFromSemaphore);
+  const { search, update, text, code, setCode } = state;
   const [firstArm, setFirstArm] = useState<SemaphoreDirection | null>(null);
   // Briefly shows the signal just added before the figure resets.
   const [flash, setFlash] = useState<SemaphorePair | null>(null);
@@ -80,93 +77,84 @@ function SemaphorePage() {
   return (
     <ToolView
       tool="/semaphore"
-      encode={{
-        input: text,
-        onInputChange: setText,
-        output: semaphoreSignalsToCode(encoded),
-        sampleText: "SECRET SIGNAL",
-        controls: (
-          <Checkbox
-            label="Include Number Prefix (# / Pos 4,5) for Digits"
-            checked={search.num}
-            onChange={(e) => update({ num: e.currentTarget.checked })}
-          />
-        ),
-        visualOutput: encoded.map((item) => (
-          <SymbolTile key={item.id} minWidth={80}>
-            <SemaphorePerson positions={item.positions} size={72} />
-            <Text size="xs" fw={700}>
-              {item.char === " " ? "SPACE" : item.char}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {pairLabel(item.positions)}
-            </Text>
-          </SymbolTile>
-        )),
-      }}
-      decode={{
-        input: code,
-        onInputChange: setCode,
-        output: text,
-        sampleText: "0,6 1,5 0,1 0,7 / 2,4 0,1 1,5",
-        interactiveWidget: (
-          <Flex
-            gap="md"
-            direction={{ base: "column", sm: "row" }}
-            justify="center"
-            align={{ base: "center", sm: "stretch" }}
+      state={state}
+      output={semaphoreSignalsToCode(encoded)}
+      sampleText="SECRET SIGNAL"
+      controls={
+        <Checkbox
+          label="Include Number Prefix (# / Pos 4,5) for Digits"
+          checked={search.num}
+          onChange={(e) => update({ num: e.currentTarget.checked })}
+        />
+      }
+      visualOutput={encoded.map((item) => (
+        <SymbolTile key={item.id} minWidth={80}>
+          <SemaphorePerson positions={item.positions} size={72} />
+          <Text size="xs" fw={700}>
+            {item.char === " " ? "SPACE" : item.char}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {pairLabel(item.positions)}
+          </Text>
+        </SymbolTile>
+      ))}
+      builder={
+        <Flex
+          gap="md"
+          direction={{ base: "column", sm: "row" }}
+          justify="center"
+          align={{ base: "center", sm: "stretch" }}
+        >
+          <Box pos="relative">
+            <SemaphorePerson
+              positions={flash ?? (firstArm === null ? [] : [firstArm])}
+              interactive
+              onSelectPosition={selectDirection}
+              size={240}
+            />
+            {flash && (
+              <Text
+                pos="absolute"
+                top={8}
+                right={12}
+                fz={36}
+                fw={700}
+                c="blue"
+                className="pointer-events-none"
+              >
+                {flashLabel}
+              </Text>
+            )}
+          </Box>
+          <SimpleGrid
+            cols={{ base: 2, sm: 1 }}
+            spacing="xs"
+            w="100%"
+            maw={{ sm: 240 }}
+            className="content-center"
           >
-            <Box pos="relative">
-              <SemaphorePerson
-                positions={flash ?? (firstArm === null ? [] : [firstArm])}
-                interactive
-                onSelectPosition={selectDirection}
-                size={240}
-              />
-              {flash && (
-                <Text
-                  pos="absolute"
-                  top={8}
-                  right={12}
-                  fz={36}
-                  fw={700}
-                  c="blue"
-                  className="pointer-events-none"
-                >
-                  {flashLabel}
-                </Text>
-              )}
-            </Box>
-            <SimpleGrid
-              cols={{ base: 2, sm: 1 }}
-              spacing="xs"
-              w="100%"
-              maw={{ sm: 240 }}
-              className="content-center"
+            <Button
+              variant="light"
+              color="gray"
+              size="md"
+              px="xs"
+              onClick={() => setCode(code ? `${code} /` : "/")}
             >
-              <Button
-                variant="light"
-                color="gray"
-                size="md"
-                px="xs"
-                onClick={() => setCode(code ? `${code} /` : "/")}
-              >
-                Space
-              </Button>
-              <Button
-                variant="light"
-                color="red"
-                size="md"
-                px="xs"
-                leftSection={<IconBackspace size={18} />}
-                onClick={backspace}
-              >
-                Backspace
-              </Button>
-            </SimpleGrid>
-          </Flex>
-        ),
-      }}
+              Space
+            </Button>
+            <Button
+              variant="light"
+              color="red"
+              size="md"
+              px="xs"
+              leftSection={<IconBackspace size={18} />}
+              onClick={backspace}
+            >
+              Backspace
+            </Button>
+          </SimpleGrid>
+        </Flex>
+      }
       reference={
         <ReferenceTable
           items={SEMAPHORE_REFERENCE_LIST}

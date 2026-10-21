@@ -21,25 +21,35 @@ import {
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { TOOLS } from "../layout/AppLayout";
-import type { ToolMode } from "./toolUrlState";
-
-interface PanelProps {
-  input: string;
-  onInputChange: (val: string) => void;
-  output: string;
-  sampleText: string;
-  controls?: ReactNode;
-}
+import type { ToolMode, ToolState } from "./toolUrlState";
 
 export interface ToolViewProps {
   tool: (typeof TOOLS)[number]["to"];
-  encode: PanelProps & { visualOutput?: ReactNode };
-  decode: PanelProps & { interactiveWidget?: ReactNode };
+  state: ToolState;
+  sampleText: string;
+  /** Encoded text, shown under the encode input. */
+  output: string;
+  /** Encode settings, shown under the encode input. */
+  controls?: ReactNode;
+  visualOutput?: ReactNode;
+  /** Input widget shown above the decode input. */
+  builder?: ReactNode;
+  decodePlaceholder?: string;
   reference: ReactNode;
 }
 
 /** The mode is the route's optional `{-$tab}` segment; encode is the bare tool path. */
-export function ToolView({ tool, encode, decode, reference }: ToolViewProps) {
+export function ToolView({
+  tool,
+  state: { text, code, setText, setCode },
+  sampleText,
+  output,
+  controls,
+  visualOutput,
+  builder,
+  decodePlaceholder = "Enter symbols or tokens to decode...",
+  reference,
+}: ToolViewProps) {
   const mode = useParams({ strict: false }).tab ?? "encode";
   const navigate = useNavigate();
   const setMode = (tab: ToolMode) =>
@@ -79,11 +89,17 @@ export function ToolView({ tool, encode, decode, reference }: ToolViewProps) {
 
       {mode === "encode" && (
         <>
-          <InputCard {...encode} placeholder="Enter text to encode..." />
-          <OutputCard title="Output" value={encode.output}>
-            {encode.visualOutput && (
+          <InputCard
+            value={text}
+            onChange={setText}
+            onSample={() => setText(sampleText)}
+            controls={controls}
+            placeholder="Enter text to encode..."
+          />
+          <OutputCard title="Output" value={output}>
+            {visualOutput && (
               <Group gap={8} mt="sm" align="flex-end">
-                {encode.visualOutput}
+                {visualOutput}
               </Group>
             )}
           </OutputCard>
@@ -92,19 +108,21 @@ export function ToolView({ tool, encode, decode, reference }: ToolViewProps) {
 
       {mode === "decode" && (
         <>
-          {decode.interactiveWidget && (
+          {builder && (
             <Card withBorder radius="md" p="md">
               <Text fw={600} size="sm" mb="xs">
                 Interactive Builder
               </Text>
-              {decode.interactiveWidget}
+              {builder}
             </Card>
           )}
           <InputCard
-            {...decode}
-            placeholder="Enter symbols or tokens to decode..."
+            value={code}
+            onChange={setCode}
+            onSample={() => setText(sampleText)}
+            placeholder={decodePlaceholder}
           />
-          <OutputCard title="Decoded Text" value={decode.output} />
+          <OutputCard title="Decoded Text" value={text} />
         </>
       )}
 
@@ -131,12 +149,18 @@ export function SymbolTile({
 }
 
 function InputCard({
-  input,
-  onInputChange,
-  sampleText,
+  value,
+  onChange,
+  onSample,
   controls,
   placeholder,
-}: PanelProps & { placeholder: string }) {
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  onSample: () => void;
+  controls?: ReactNode;
+  placeholder: string;
+}) {
   return (
     <Card withBorder radius="md" p="md">
       <Group justify="space-between" mb="xs">
@@ -148,7 +172,7 @@ function InputCard({
             variant="subtle"
             size="xs"
             leftSection={<IconSparkles size={14} />}
-            onClick={() => onInputChange(sampleText)}
+            onClick={onSample}
           >
             Sample
           </Button>
@@ -157,8 +181,8 @@ function InputCard({
             color="gray"
             size="xs"
             leftSection={<IconEraser size={14} />}
-            onClick={() => onInputChange("")}
-            disabled={!input}
+            onClick={() => onChange("")}
+            disabled={!value}
           >
             Clear
           </Button>
@@ -170,8 +194,8 @@ function InputCard({
         minRows={3}
         maxRows={8}
         autosize
-        value={input}
-        onChange={(e) => onInputChange(e.currentTarget.value)}
+        value={value}
+        onChange={(e) => onChange(e.currentTarget.value)}
       />
       {controls && <Box mt="sm">{controls}</Box>}
     </Card>

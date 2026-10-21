@@ -50,6 +50,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   // Keep the encode/decode/reference tab when switching tools.
   const tab = useParams({ strict: false, select: (p) => p.tab });
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const links = TOOLS.map(({ to, label, icon: Icon }) => ({
+    key: to,
+    to: tab ? `${to}/${tab}` : to,
+    label,
+    icon: <Icon size={18} />,
+    active: currentPath.startsWith(to),
+  }));
 
   return (
     <AppShell
@@ -84,23 +91,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </Group>
 
             <Group gap="xs" visibleFrom="sm">
-              {TOOLS.map((item) => {
-                const Icon = item.icon;
-                const active = currentPath.startsWith(item.to);
-                return (
-                  <Button
-                    key={item.to}
-                    component={Link}
-                    to={tab ? `${item.to}/${tab}` : item.to}
-                    variant={active ? "light" : "subtle"}
-                    color={active ? "blue" : "gray"}
-                    leftSection={<Icon size={18} />}
-                    size="xs"
-                  >
-                    {item.label}
-                  </Button>
-                );
-              })}
+              {links.map(({ key, to, label, icon, active }) => (
+                <Button
+                  key={key}
+                  component={Link}
+                  to={to}
+                  variant={active ? "light" : "subtle"}
+                  color={active ? "blue" : "gray"}
+                  leftSection={icon}
+                  size="xs"
+                >
+                  {label}
+                </Button>
+              ))}
             </Group>
 
             <ActionIcon
@@ -122,21 +125,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       <AppShell.Navbar p="sm">
         <Stack gap="xs">
-          {TOOLS.map((item) => {
-            const Icon = item.icon;
-            const active = currentPath.startsWith(item.to);
-            return (
-              <NavLink
-                key={item.to}
-                component={Link}
-                to={tab ? `${item.to}/${tab}` : item.to}
-                label={item.label}
-                leftSection={<Icon size={18} />}
-                active={active}
-                onClick={close}
-              />
-            );
-          })}
+          {links.map(({ key, to, label, icon, active }) => (
+            <NavLink
+              key={key}
+              component={Link}
+              to={to}
+              label={label}
+              leftSection={icon}
+              active={active}
+              onClick={close}
+            />
+          ))}
         </Stack>
       </AppShell.Navbar>
 
