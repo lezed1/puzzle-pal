@@ -18,10 +18,12 @@ import {
   IconEraser,
   IconSparkles,
 } from "@tabler/icons-react";
-import { type ReactNode, useState } from "react";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { TOOLS } from "../layout/AppLayout";
 
-type ToolMode = "encode" | "decode" | "reference";
+export const TOOL_MODES = ["encode", "decode", "reference"] as const;
+export type ToolMode = (typeof TOOL_MODES)[number];
 
 interface PanelProps {
   input: string;
@@ -38,8 +40,16 @@ export interface ToolViewProps {
   reference: ReactNode;
 }
 
+/** The mode is the route's optional `{-$tab}` segment; encode is the bare tool path. */
 export function ToolView({ tool, encode, decode, reference }: ToolViewProps) {
-  const [mode, setMode] = useState<ToolMode>("encode");
+  const mode = useParams({ strict: false }).tab ?? "encode";
+  const navigate = useNavigate();
+  const setMode = (tab: ToolMode) =>
+    navigate({
+      to: `${tool}/{-$tab}`,
+      params: { tab: tab === "encode" ? undefined : tab },
+      search: true,
+    });
   // biome-ignore lint/style/noNonNullAssertion: `tool` is typed to TOOLS paths
   const { label, icon: Icon, color } = TOOLS.find((t) => t.to === tool)!;
 

@@ -10,63 +10,70 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as BrailleRouteImport } from './routes/braille'
-import { Route as MorseRouteImport } from './routes/morse'
-import { Route as SemaphoreRouteImport } from './routes/semaphore'
+import { Route as BrailleChar123TabChar125RouteImport } from './routes/braille.{-$tab}'
+import { Route as MorseChar123TabChar125RouteImport } from './routes/morse.{-$tab}'
+import { Route as SemaphoreChar123TabChar125RouteImport } from './routes/semaphore.{-$tab}'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BrailleRoute = BrailleRouteImport.update({
-  id: '/braille',
-  path: '/braille',
+const BrailleChar123TabChar125Route =
+  BrailleChar123TabChar125RouteImport.update({
+    id: '/braille/{-$tab}',
+    path: '/braille/{-$tab}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MorseChar123TabChar125Route = MorseChar123TabChar125RouteImport.update({
+  id: '/morse/{-$tab}',
+  path: '/morse/{-$tab}',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MorseRoute = MorseRouteImport.update({
-  id: '/morse',
-  path: '/morse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SemaphoreRoute = SemaphoreRouteImport.update({
-  id: '/semaphore',
-  path: '/semaphore',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const SemaphoreChar123TabChar125Route =
+  SemaphoreChar123TabChar125RouteImport.update({
+    id: '/semaphore/{-$tab}',
+    path: '/semaphore/{-$tab}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/braille': typeof BrailleRoute
-  '/morse': typeof MorseRoute
-  '/semaphore': typeof SemaphoreRoute
+  '/braille/{-$tab}': typeof BrailleChar123TabChar125Route
+  '/morse/{-$tab}': typeof MorseChar123TabChar125Route
+  '/semaphore/{-$tab}': typeof SemaphoreChar123TabChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/braille': typeof BrailleRoute
-  '/morse': typeof MorseRoute
-  '/semaphore': typeof SemaphoreRoute
+  '/braille/{-$tab}': typeof BrailleChar123TabChar125Route
+  '/morse/{-$tab}': typeof MorseChar123TabChar125Route
+  '/semaphore/{-$tab}': typeof SemaphoreChar123TabChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/braille': typeof BrailleRoute
-  '/morse': typeof MorseRoute
-  '/semaphore': typeof SemaphoreRoute
+  '/braille/{-$tab}': typeof BrailleChar123TabChar125Route
+  '/morse/{-$tab}': typeof MorseChar123TabChar125Route
+  '/semaphore/{-$tab}': typeof SemaphoreChar123TabChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/braille' | '/morse' | '/semaphore'
+  fullPaths: '/' | '/braille/{-$tab}' | '/morse/{-$tab}' | '/semaphore/{-$tab}'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/braille' | '/morse' | '/semaphore'
-  id: '__root__' | '/' | '/braille' | '/morse' | '/semaphore'
+  to: '/' | '/braille/{-$tab}' | '/morse/{-$tab}' | '/semaphore/{-$tab}'
+  id:
+    | '__root__'
+    | '/'
+    | '/braille/{-$tab}'
+    | '/morse/{-$tab}'
+    | '/semaphore/{-$tab}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  BrailleRoute: typeof BrailleRoute
-  MorseRoute: typeof MorseRoute
-  SemaphoreRoute: typeof SemaphoreRoute
+  BrailleChar123TabChar125Route: typeof BrailleChar123TabChar125Route
+  MorseChar123TabChar125Route: typeof MorseChar123TabChar125Route
+  SemaphoreChar123TabChar125Route: typeof SemaphoreChar123TabChar125Route
 }
 
 declare module '@tanstack/react-router' {
@@ -78,25 +85,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/braille': {
-      id: '/braille'
-      path: '/braille'
-      fullPath: '/braille'
-      preLoaderRoute: typeof BrailleRouteImport
+    '/braille/{-$tab}': {
+      id: '/braille/{-$tab}'
+      path: '/braille/{-$tab}'
+      fullPath: '/braille/{-$tab}'
+      preLoaderRoute: typeof BrailleChar123TabChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/morse': {
-      id: '/morse'
-      path: '/morse'
-      fullPath: '/morse'
-      preLoaderRoute: typeof MorseRouteImport
+    '/morse/{-$tab}': {
+      id: '/morse/{-$tab}'
+      path: '/morse/{-$tab}'
+      fullPath: '/morse/{-$tab}'
+      preLoaderRoute: typeof MorseChar123TabChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/semaphore': {
-      id: '/semaphore'
-      path: '/semaphore'
-      fullPath: '/semaphore'
-      preLoaderRoute: typeof SemaphoreRouteImport
+    '/semaphore/{-$tab}': {
+      id: '/semaphore/{-$tab}'
+      path: '/semaphore/{-$tab}'
+      fullPath: '/semaphore/{-$tab}'
+      preLoaderRoute: typeof SemaphoreChar123TabChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -104,9 +111,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  BrailleRoute: BrailleRoute,
-  MorseRoute: MorseRoute,
-  SemaphoreRoute: SemaphoreRoute,
+  BrailleChar123TabChar125Route: BrailleChar123TabChar125Route,
+  MorseChar123TabChar125Route: MorseChar123TabChar125Route,
+  SemaphoreChar123TabChar125Route: SemaphoreChar123TabChar125Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

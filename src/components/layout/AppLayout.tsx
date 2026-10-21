@@ -84,7 +84,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <Group gap="xs" visibleFrom="sm">
               {TOOLS.map((item) => {
                 const Icon = item.icon;
-                const active = currentPath === item.to;
+                const active = currentPath.startsWith(item.to);
                 return (
                   <Button
                     key={item.to}
@@ -122,7 +122,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <Stack gap="xs">
           {TOOLS.map((item) => {
             const Icon = item.icon;
-            const active = currentPath === item.to;
+            const active = currentPath.startsWith(item.to);
             return (
               <NavLink
                 key={item.to}
