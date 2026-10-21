@@ -20,7 +20,7 @@ import {
 } from "../lib/braille";
 
 export const Route = createFileRoute("/braille/{-$tab}")({
-  ...toolRouteOptions("PUZZLE PAL", {
+  ...toolRouteOptions({
     num: setting(z.boolean(), false),
     cap: setting(z.boolean(), false),
   }),

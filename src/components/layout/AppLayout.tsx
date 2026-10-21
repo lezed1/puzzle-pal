@@ -18,7 +18,7 @@ import {
   IconRadio,
   IconSun,
 } from "@tabler/icons-react";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useParams } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 export const TOOLS = [
@@ -47,6 +47,8 @@ export const TOOLS = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const [opened, { toggle, close }] = useDisclosure(false);
   const currentPath = useLocation({ select: (l) => l.pathname });
+  // Keep the encode/decode/reference tab when switching tools.
+  const tab = useParams({ strict: false, select: (p) => p.tab });
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   return (
@@ -89,7 +91,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <Button
                     key={item.to}
                     component={Link}
-                    to={item.to}
+                    to={tab ? `${item.to}/${tab}` : item.to}
                     variant={active ? "light" : "subtle"}
                     color={active ? "blue" : "gray"}
                     leftSection={<Icon size={18} />}
@@ -127,7 +129,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <NavLink
                 key={item.to}
                 component={Link}
-                to={item.to}
+                to={tab ? `${item.to}/${tab}` : item.to}
                 label={item.label}
                 leftSection={<Icon size={18} />}
                 active={active}

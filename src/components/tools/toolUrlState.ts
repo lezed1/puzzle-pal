@@ -10,6 +10,9 @@ import { z } from "zod";
 export const TOOL_MODES = ["encode", "decode", "reference"] as const;
 export type ToolMode = (typeof TOOL_MODES)[number];
 
+// Shared by every tool so text carries over unchanged when switching between them.
+const DEFAULT_TEXT = "PUZZLE PAL";
+
 /** A search param that falls back to `value` when missing or invalid. */
 export const setting = <T extends z.ZodType>(
   schema: T,
@@ -17,18 +20,13 @@ export const setting = <T extends z.ZodType>(
 ) => schema.default(value).catch(value);
 
 /**
- * Route options shared by every tool: the optional `{-$tab}` segment, plus search params
- * `text` and `code` alongside the tool's own settings, with defaults stripped from the URL.
- * `code` is set only when the decode side was last edited, so its raw input survives reloads.
+ * Route options shared by every tool: the optional `{-$tab}` segment, plus a plain-text
+ * `text` search param alongside the tool's own settings, with defaults stripped from the URL.
  */
-export function toolRouteOptions<T extends z.ZodRawShape>(
-  defaultText: string,
-  settings: T,
-) {
+export function toolRouteOptions<T extends z.ZodRawShape>(settings: T) {
   const schema = z.object({
     // The default search parser JSON-decodes values, so "123" arrives as a number.
-    text: setting(z.coerce.string(), defaultText),
-    code: z.coerce.string().optional().catch(undefined),
+    text: setting(z.coerce.string(), DEFAULT_TEXT),
     ...settings,
   });
   return {
@@ -48,6 +46,7 @@ export function toolRouteOptions<T extends z.ZodRawShape>(
   };
 }
 
+/** `code` is the raw decode input, kept only locally; the URL holds just the plain text. */
 interface TextDraft {
   text: string;
   code?: string;
@@ -58,7 +57,7 @@ interface TextDraft {
  * runs in a React transition, which would make a URL-controlled textarea lag and jump its
  * cursor, and Safari throttles rapid `replaceState` calls.
  */
-export function useToolState<S extends TextDraft>(
+export function useToolState<S extends { text: string }>(
   search: S,
   encode: (text: string) => string,
   decode: (code: string) => string,
@@ -71,31 +70,30 @@ export function useToolState<S extends TextDraft>(
       replace: true,
     });
 
-  const [draft, setDraft] = useState<TextDraft>(search);
-  const written = useRef(draft);
-  const commit = useDebouncedCallback((d: TextDraft) => {
-    written.current = d;
-    update(d as Partial<S>);
+  const [draft, setDraft] = useState<TextDraft>({ text: search.text });
+  const written = useRef(search.text);
+  const commit = useDebouncedCallback((text: string) => {
+    written.current = text;
+    update({ text } as Partial<S>);
   }, 300);
   const edit = (d: TextDraft) => {
     setDraft(d);
-    commit(d);
+    commit(d.text);
   };
   // Adopt URL changes we didn't make ourselves (back/forward).
   useEffect(() => {
-    const { text, code } = written.current;
-    if (search.text !== text || search.code !== code) {
-      written.current = { text: search.text, code: search.code };
-      setDraft(written.current);
+    if (search.text !== written.current) {
+      written.current = search.text;
+      setDraft({ text: search.text });
     }
-  }, [search.text, search.code]);
+  }, [search.text]);
 
   return {
     search,
     update,
     text: draft.text,
     code: draft.code ?? encode(draft.text),
-    setText: (text: string) => edit({ text, code: undefined }),
+    setText: (text: string) => edit({ text }),
     setCode: (code: string) => edit({ text: decode(code), code }),
   };
 }

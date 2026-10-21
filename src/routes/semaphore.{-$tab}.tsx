@@ -25,7 +25,7 @@ import {
 } from "../lib/semaphore";
 
 export const Route = createFileRoute("/semaphore/{-$tab}")({
-  ...toolRouteOptions("FLAG", { num: setting(z.boolean(), true) }),
+  ...toolRouteOptions({ num: setting(z.boolean(), true) }),
   component: SemaphorePage,
 });
 

@@ -32,7 +32,7 @@ const keys = <T extends object>(o: T) =>
   Object.keys(o) as [keyof T & string, ...(keyof T & string)[]];
 
 export const Route = createFileRoute("/morse/{-$tab}")({
-  ...toolRouteOptions("SOS PUZZLE", {
+  ...toolRouteOptions({
     sep: setting(z.enum(keys(LETTER_SEPARATORS)), "space"),
     wsep: setting(z.enum(keys(WORD_SEPARATORS)), "slash"),
   }),
